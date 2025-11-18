@@ -1,117 +1,62 @@
----
-title: "Visualizing Data with R: From Basics to Publication-Ready Graphics--Part 2"
-author: "Nevada Bioinformatics Center"
-date: "`r Sys.Date()`"
-output: 
-  html_document:
-    toc: true
-    toc_depth: 3
-    toc_float: 
-      collapsed: false
-      smooth_scroll: true
-    code_folding: show
-    theme: readable
-    highlight: tango
----
+# Visualizing Data with R: From Basics to Publication-Ready Graphics--Part 2
+# Nevada Bioinformatics Center
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# 1. Introduction ----
 
-## 1. Introduction
+# 1.1 Recap ----
 
+# 1.2 Overview ----
 
-### 1.1 Recap
-
-
-### 1.2 Overview
-
-
-```{r}
 # View the built-in dataset
 head(mtcars)
-```
 
-The mtcars dataset contains data on 32 car models, with the following columns:
-
-- **mpg:** Miles per gallon (fuel efficiency).
-
-- **cyl:** Number of cylinders in the engine (4, 6, or 8).
-
-- **disp:** Engine displacement (in cubic inches).
-
-- **hp:** Gross horsepower.
-
-- **drat:** Rear axle ratio.
-
-- **wt:** Weight of the car (in 1000s of pounds).
-
-- **qsec:** 1/4 mile time (time in seconds to cover a quarter mile).
-
-- **vs:** Engine shape (0 = V-shaped, 1 = straight).
-
-- **am:** Transmission type (0 = automatic, 1 = manual).
-
-- **gear:** Number of forward gears.
-
-- **carb:** Number of carburetors.
+# The mtcars dataset contains data on 32 car models, with the following columns:
+# - mpg: Miles per gallon (fuel efficiency).
+# - cyl: Number of cylinders in the engine (4, 6, or 8).
+# - disp: Engine displacement (in cubic inches).
+# - hp: Gross horsepower.
+# - drat: Rear axle ratio.
+# - wt: Weight of the car (in 1000s of pounds).
+# - qsec: 1/4 mile time (time in seconds to cover a quarter mile).
+# - vs: Engine shape (0 = V-shaped, 1 = straight).
+# - am: Transmission type (0 = automatic, 1 = manual).
+# - gear: Number of forward gears.
+# - carb: Number of carburetors.
  
-
-In the dataset, we have categorical data (`cyl`, `vs`, `am`, `gear`, `carb`) and continuous data (`mpg`, `disp`, `hp`, `drat`, `wt`, `qsec`).
-
-
-## 2. Data Summarization
-
-### 2.1 Reviewing the Data
+# In the dataset, we have categorical data (cyl, vs, am, gear, carb) and 
+# continuous data (mpg, disp, hp, drat, wt, qsec).
 
 
-```{r}
+# 2. Data Summarization ----
+
+# 2.1 Reviewing the Data ----
+
 # Load libraries and data
 library(ggplot2)
 data("mtcars")
 
 ggplot(mtcars, aes(x=mpg)) + geom_histogram(binwidth=1)
-```
 
-Change the binwidth to 0.5
-Change the binwidth to 1.5
-Change the binwidth to 10
-
+# Change the binwidth to 0.5
+# Change the binwidth to 1.5
+# Change the binwidth to 10
 
 
-
-```{r, eval=FALSE}
-ggplot(mtcars, aes(x=factor(cyl))) + geom_histogram(binwidth = 1)
-
-```
+# ggplot(mtcars, aes(x=factor(cyl))) + geom_histogram(binwidth = 1)
 
 
-
-```{r}
 ggplot(mtcars, aes(x=cyl)) + geom_histogram(binwidth = 1)
-```
 
-
-
-```{r}
 
 ggplot(mtcars, aes(x = factor(cyl))) +   # Factor again for categorical
   geom_bar()
 
-```
-
-Look at the distribution of qsec in the code block below:
-
-```{r, eval=FALSE}
+# Look at the distribution of qsec in the code block below:
 
 
-```
 
+# 2.2 Plotting Summary Statistics with dplyr ----
 
-### 2.2 Plotting Summary Statistics with dplyr
-
-
-```{r, message=FALSE}
 # Install libraries if necessary
 if (!requireNamespace("dplyr", quietly = TRUE)) {
   install.packages("dplyr")
@@ -124,11 +69,8 @@ if (!requireNamespace("tidyverse", quietly = TRUE)) {
 # Load libraries
 library(dplyr)
 library(tidyverse)                                 # data manipulation
-```
 
 
-
-```{r, message=FALSE}
 mtcars_summary <- mtcars %>%
   group_by(cyl) %>%  # Group by the number of cylinders
   summarise(
@@ -148,43 +90,26 @@ mtcars_summary <- mtcars %>%
     qsec_upper_ci = qsec_mean + qt(1 - (0.05 / 2), qsec_n - 1) * qsec_se   # qsec upper 95% CI
   )
 
-```
 
-
-
-```{r, message=FALSE}
 ggplot(data = mtcars_summary, aes(x = factor(cyl), y = qsec_mean)) +
   geom_bar(stat = "identity")
-```
 
 
-
-```{r, message=FALSE}
 ggplot(data = mtcars_summary, aes(x = factor(cyl), y = qsec_mean, color = factor(cyl))) +
   geom_bar(stat = "identity")
-```
 
-#### Wait, why didn't that work?
+# Wait, why didn't that work?
+# How do we use color appropriately in our geom_bar()?
 
-How do we use color appropriately in our geom_bar()?
-
-
-
-
-
-```{r, message=FALSE}
 
 # Manually adding error bars
 ggplot(data = mtcars_summary, aes(x = factor(cyl), y = qsec_mean, fill = factor(cyl))) +
   geom_bar(stat = "identity") +
   geom_errorbar(aes(ymin = qsec_lower_ci, ymax = qsec_upper_ci)) 
-```
 
 
-### 2.3 Plotting Summary Statistics with Hmisc
+# 2.3 Plotting Summary Statistics with Hmisc ----
 
-
-```{r, message=FALSE}
 # Install and load the Hmisc package
 if (!requireNamespace("Hmisc", quietly = TRUE)) {
   install.packages("Hmisc")
@@ -198,13 +123,8 @@ ggplot(data = mtcars,
          y = qsec, 
          fill = factor(cyl))) +
   stat_summary(fun = mean, geom = "bar") + 
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar" # Add error bars showing confidence intervals
-    )
-```
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar") # Add error bars showing confidence intervals
 
-
-
-```{r, message=FALSE}
 
 ggplot(data = mtcars, 
        aes(
@@ -214,20 +134,13 @@ ggplot(data = mtcars,
   stat_summary(fun = mean, geom = "point", size = 5) + 
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar")
   
-```
+# Change the colors back
+# Make the error bars black and thinner
+# Put the error bars behind the points
 
 
-Change the colors back
-Make the error bars black and thinner
-Put the error bars behind the points
+# 2.4 Why Bar Plots are Bad ----
 
-
-
-
-### 2.4 Why Bar Plots are Bad
-
-
-```{r, warning=FALSE, message=FALSE}
 set.seed(123)  # For reproducibility
 
 # Red data
@@ -248,76 +161,44 @@ data <- data.frame(
 data$group <- factor(data$group, levels = c("Red", "Blue"))
 
 # View our data
-
 head(data)
 
-```
-
-
-```{r, warning=FALSE, message=FALSE}
 
 ggplot(data, aes(x = value, fill = group)) +
   geom_histogram(binwidth = 5) +
   facet_wrap(~ group) +
   labs(title = "Clearly Different Distributions")
 
-```
 
-```{r, warning=FALSE, message=FALSE}
 ggplot(data, aes(x = group, y=value, fill = group)) +
   geom_boxplot() +
   labs(title = "Still Looks Different")
 
-```
-
-
-```{r, warning=FALSE, message=FALSE}
 
 ggplot(data, aes(x = group, y = value, fill = group)) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.4) +
   stat_summary(fun = mean, geom = "bar", color = "black", width = 0.6) +
   labs(title = "They Look the Same!")
 
-```
-
-#### Friends Don't Let Friends Make Barplots
+# Friends Don't Let Friends Make Barplots
 
 
+# 3. Plotting Raw Data ----
 
-## 3. Plotting Raw Data
-
-
-#### Boxplot
-
-
-```{r, message=FALSE}
+# Boxplot
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, fill = factor(cyl))) 
-```
 
 
-#### Violin Plot
-
-
-```{r, message=FALSE}
+# Violin Plot
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, fill = factor(cyl)))
-```
 
-Can add draw_quantiles
+# Can add draw_quantiles
 
-#### Raw Data Points
-
-
-```{r, message=FALSE}
+# Raw Data Points
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, fill = factor(cyl)))  # Switch back to color
 
-```
 
-
-#### Plotting Raw Data and Summary Stats
-
-
-```{r, message=FALSE}
-
+# Plotting Raw Data and Summary Stats
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   geom_point(size = 5) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
@@ -326,73 +207,48 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
     size = 5, color = "black") 
 
 
-```
-
-### Now we have a(n ugly) figure! 
+# Now we have a(n ugly) figure! 
 
 
-## 4. Customizing Figures
+# 4. Customizing Figures ----
 
-### 4.1 Themes
-
-
-```{r, message=FALSE}
+# 4.1 Themes ----
 
 # Add theme_classic
 
-
-
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   geom_point(size = 5) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
         color = "black", width = 0.2) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black")
-```
 
 
-
-
-Much better! Try out `theme_minimal()` and `theme_bw()`.
-
-```{r, eval = FALSE}
+# Much better! Try out theme_minimal() and theme_bw().
 
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   geom_point(size = 5) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
         color = "black", width = 0.2) +
   stat_summary(fun = mean, geom = "point",
-    size = 5, color = "black") +                 # Add your theme here
+    size = 5, color = "black")     # Add your theme here
   
 
 
-```
-
-
-
-```{r, message=FALSE}
 # Set our theme to classic
 theme_set(theme_classic())
-```
 
 
-
-```{r, message=FALSE}
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   geom_point(size = 5) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
         color = "black", width = 0.2) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black")
-```
 
 
+# 4.2 Shapes and Colors ----
 
-### 4.2 Shapes and Colors
-
-
-
-```{r, message=FALSE}
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   geom_point(size = 5, pch = 21) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
@@ -400,13 +256,6 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec, color = factor(cyl))) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black") 
   
-```
-
-
-
-
-
-```{r, message=FALSE}
 
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
@@ -415,11 +264,7 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black") 
 
-```
 
-
-
-```{r, message=FALSE}
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(size = 5, pch = 21, color = "hotpink", stroke = 2, # Thicken border
              aes(fill = factor(cyl))) +
@@ -427,27 +272,11 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
         color = "black", width = 0.2) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black") 
-```
 
+# Pick some different shapes to test 
 
-Pick some different shapes to test 
-
-
-
-
-
-
-
-
-
-
-
-
-```{r, message=FALSE}
 
 # Manually pick colors
-
-
 
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
@@ -457,12 +286,6 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
     size = 5, color = "black") +
   scale_fill_manual() 
 
-```
-
-
-
-
-```{r, message=FALSE}
 
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
@@ -471,18 +294,12 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black") +
   scale_fill_brewer(palette = "Set2") 
-```
 
-
-```{r}
 RColorBrewer::display.brewer.all()
-```
 
 
+# We can also use a color pallet generator (https://coolors.co/) for custom color pallets. 
 
-We can also use a [color pallet generator](https://coolors.co/) for custom color pallets. 
-
-```{r, message=FALSE}
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
@@ -491,11 +308,6 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
     size = 5, color = "black") +
   scale_fill_manual(values = c("#3A3238", "#6E4555", "#D282A6")) 
 
-```
-
-
-
-```{r, message=FALSE}
 
 # Add position = position_jitter
 
@@ -508,13 +320,10 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   stat_summary(fun = mean, geom = "point",
     size = 5, color = "black") +
   scale_fill_manual(values = c("grey50", "grey40", "#0074D9"))
-```
 
 
-### 4.3 Labels and Axes
+# 4.3 Labels and Axes ----
 
-
-```{r, message=FALSE}
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(position = position_jitter(width = 0.05), size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar",
@@ -530,11 +339,6 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
                               "6" = "Still Slow", 
                               "8" = "Fast but Broke"))     # Custom x axis labels
 
-```
-
-
-
-```{r, eval=FALSE}
 
 # Add x, y, title, and legend labels
 
@@ -551,25 +355,16 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
                "8" = "Fast but Broke")) +        # Custom legend labels
   scale_x_discrete(labels = c("4" = "Slowest", 
                               "6" = "Still Slow", 
-                              "8" = "Fast but Broke")) +    # Custom x axis labels
+                              "8" = "Fast but Broke"))     # Custom x axis labels
   
 
 
-
-```
-
-
-Set the y-axis breaks to 12, 18, at 24, and limits 12-24.
-Change the theme to have larger text, in Times New Roman, and remove the legend
+# Set the y-axis breaks to 12, 18, at 24, and limits 12-24.
+# Change the theme to have larger text, in Times New Roman, and remove the legend
 
 
-
-#### Try it for yourself:
-
-Edit the plot yourself: chose different colors, shapes, titles, and adjustments:
-
-
-```{r, eval=FALSE}
+# Try it for yourself:
+# Edit the plot yourself: chose different colors, shapes, titles, and adjustments:
 
 ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
   geom_point(position = position_jitter(width = 0.05), size = 5, pch = 21, color = "black", aes(fill = factor(cyl))) +
@@ -587,14 +382,7 @@ ggplot(data = mtcars, aes(x = factor(cyl), y = qsec)) +
                               "8" = "Fast but Broke")) 
 
 
-
-```
-
-
-## 5. Example--Bubble Plot
-
-
-```{r, message=FALSE}
+# 5. Example--Bubble Plot ----
 
 if (!requireNamespace("gapminder", quietly = TRUE)) {
   install.packages("gapminder")
@@ -602,12 +390,7 @@ if (!requireNamespace("gapminder", quietly = TRUE)) {
 
 library(gapminder)  
 data("gapminder")
-```
 
-
-
-
-```{r}
 
 # Filter out 2007 data
 data <- gapminder %>% 
@@ -618,11 +401,6 @@ data %>%
 mutate(pop=pop/1000000) %>%
 arrange(desc(pop)) %>%
 mutate(country = factor(country)) 
-
-```
-
-
-```{r, message = FALSE}
 
 
 # Let's install a new package for a better color pallet
@@ -640,10 +418,6 @@ ggplot(data, aes(x=gdpPercap, y=lifeExp, size = pop, color = continent)) +
   scale_color_viridis(discrete=TRUE) +
   theme(legend.position="bottom")
 
-```
-
-
-```{r, message=FALSE}
 
 # Plot
 ggplot(data, aes(x=gdpPercap, y=lifeExp, size = pop, color = continent)) +
@@ -652,16 +426,11 @@ ggplot(data, aes(x=gdpPercap, y=lifeExp, size = pop, color = continent)) +
   scale_color_viridis(discrete=TRUE) +
   theme(legend.position="bottom")
 
-```
-
-
-```{r, message=FALSE}
 
 # Packge for annotations with "geom_text_repel"
 if (!requireNamespace("ggrepel", quietly = TRUE)) {
   install.packages("ggrepel")
 }
-
 
 library(ggrepel)                                   # extra geoms for ggplot2
 
@@ -673,16 +442,9 @@ mutate(annotation = case_when(
   gdpPercap > 40000 ~ "yes")) 
 
 
-
-```
-
-
-```{r}
 ?geom_text_repel
-```
 
 
-```{r, message=FALSE}
 # Plot
 ggplot(tmp, aes(x=gdpPercap, y=lifeExp, size = pop, color = continent)) +
   geom_point(alpha=0.7) +
@@ -691,10 +453,7 @@ ggplot(tmp, aes(x=gdpPercap, y=lifeExp, size = pop, color = continent)) +
   theme(legend.position="none") + # Remove both legends for aestetics
   geom_text_repel(data=tmp %>% filter(annotation=="yes"), aes(label=country), size=4 )
 
-```
 
-
-```{r, message=FALSE}
 ggplot(tmp, aes(x = gdpPercap, y = lifeExp, size = pop, color = continent)) +
   geom_point(alpha = 0.7) +
   scale_size(range = c(1.4, 19), name = "Population (Millions)") +
@@ -721,20 +480,11 @@ ggplot(tmp, aes(x = gdpPercap, y = lifeExp, size = pop, color = continent)) +
     aes(label = country),
     size = 4
   )
-```
 
 
+# 6. Exercises ----
 
-
-## 6. Exercises
-
-
-Create this image:
-
-
-![](images/ex1.png)
-
-```{r, eval=FALSE}
+# Create this image: images/ex1.png
 
 # Here is some helpful code
 am0 <-subset(mtcars, am == 0)
@@ -742,25 +492,10 @@ am1 <-subset(mtcars, am == 1)
 mn0 <- round(mean(am0$mpg), 2)
 mn1 <- round(mean(am1$mpg), 2)
 
-
 # Create plot here
 
 
+# Create this image: images/ex2.png
 
 
-```
-
-
-Create this image:
-
-
-![](images/ex2.png)
-
-```{r, eval=FALSE}
-
-```
-
-
-
-
-## 7. Summary
+# 7. Summary ----
